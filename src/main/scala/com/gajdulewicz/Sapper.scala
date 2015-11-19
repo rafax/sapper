@@ -9,11 +9,20 @@ import scala.reflect.ClassTag
 object Sapper {
   type MappingError = String
   type MappingResult[TTo] = Either[Seq[MappingError], TTo]
-  type ConcreteMapper[TFrom, TTo] = TFrom => MappingResult[TTo]
+}
 
-  def apply[TFrom, TTo](from: TFrom)(implicit mapper: ConcreteMapper[TFrom, TTo]): MappingResult[TTo] = {
-    mapper(from)
+class Sapper {
+  def apply[A](a: A) = new PartialMapping[A](a)
+}
+
+class PartialMapping[A](a: A) {
+  def to[B]()(implicit mapper: Mapper[A, B]): MappingResult[B] = {
+    mapper.map(a)
   }
+}
+
+trait Mapper[A, B] {
+  def map(a: A): MappingResult[B]
 }
 
 object ReflectiveMapper {
